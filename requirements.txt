@@ -1,7 +1,7 @@
 streamlit
 requests
 bs4
-threading
+threaded
 pyodbc
 fuzzywuzzy
 python-Levenshtein
