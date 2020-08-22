@@ -1,7 +1,4 @@
 # Ignore everything in this directory
-*
-!data*
-!model*
-!config*
+
 # Except this file
 !.gitignore
