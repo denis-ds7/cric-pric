@@ -1,3 +1,7 @@
 streamlit
 requests
 bs4
+threading
+pyodbc
+fuzzywuzzy
+python-Levenshtein
