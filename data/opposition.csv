@@ -1,7 +1,23 @@
-Centuries,Fifties,BatAvg,HS,No. of Inn (Bat),BatSR,Player Name,Zeros,WicketHaul,BowlAvg,Overs,BowlSR,No. of Inn (Bowl)
-0,7,29.38,87,27,125.00,Rohit Sharma,1,0,43.50,11,33.00,5.0
-0,0,44.67,25,9,154.02,Hardik Pandya,1,0,20.13,22,16.50,8.0
-0,0,4.50,17,5,81.82,Lasith Malinga,3,1,19.03,81.3,15.77,28.0
-0,3,34.89,63,29,130.77,MS Dhoni,1,0,0,0,0,0.0
-0,0,7.00,5,3,77.78,Imran Tahir,0,0,23.59,46.1,16.29,16.0
-0,7,31.46,83,32,140.79,Suresh Raina,3,0,50.00,18.3,37.00,7.0
+Centuries,Fifties,BatAvg,HS,No. of Inn (Bat),BatSR,Player,Zeros,WicketHaul,BowlAvg,Overs,BowlSR,No. of Inn (Bowl)
+0,1,54.00,54,1,135.00,Devdutt Padikkal,0,0,0,0,0,0
+0,3,29.67,68,10,116.09,Aaron Finch,3,0,24.00,4,24.00,2
+0,3,28.55,92,25,127.90,Virat Kohli,2,0,0,3,0,1
+1,4,47.40,133,21,146.60,AB de Villiers,0,0,0,0,0,0
+0,0,4.00,6,3,88.89,Gurkeerat Singh Mann,1,0,0,0,0,0
+0,0,0,27,2,240.00,Shivam Dube,0,0,0,0,0,0
+0,0,5.00,7,4,71.43,Washington Sundar,0,0,22.80,19,22.80,7
+0,0,0,0,0,0,Isuru Udana,0,0,22.50,4,12.00,2
+0,0,0,0,0,0,Navdeep Saini,0,0,0,11,0,4
+0,0,0,0,0,0,Adam Zampa,0,0,30.00,12,18.00,4
+0,0,0,0,0,0,Yuzvendra Chahal,0,1,22.18,46,16.24,16
+1,2,45.71,108,7,153.11,Quinton de Kock,0,0,0,0,0,0
+0,7,29.04,94,26,136.67,Rohit Sharma,4,0,0,4,0,2
+0,0,17.63,38,11,120.51,Suryakumar Yadav,2,0,0,0,0,0
+0,1,29.17,99,6,182.29,Ishan Kishan,2,0,0,0,0,0
+0,1,66.67,50,10,172.41,Hardik Pandya,0,0,42.00,21,25.20,7
+0,3,41.00,70,21,166.56,Kieron Pollard,0,0,28.60,33,19.80,11
+0,0,22.25,37,7,103.49,Krunal Pandya,0,0,23.33,32,21.33,11
+0,0,0,0,0,0,James Pattinson,0,0,0,4,0,2
+0,0,0,0,0,0,Rahul Chahar,0,0,62.00,8,48.00,3
+0,0,0,0,0,0,Trent Boult,0,0,17.88,16,12.00,6
+0,0,0,1,2,50.00,Jasprit Bumrah,0,0,26.50,54,20.25,18
