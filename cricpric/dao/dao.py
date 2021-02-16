@@ -51,8 +51,8 @@ class TeamsDAO:
     EX_TEAM_ID = "Failed getting team id using ({0})"
     EX_TEAMS = "Failed to get teams"
     EX_TEAM_NAME = "Invalid team name in ({0})"
-    GET_TEAMS = "select teamName from teams"
-    GET_TEAM_ID = "select citid from teams where teamName = ?"
+    GET_TEAMS = "select teamName from dbo.teams"
+    GET_TEAM_ID = "select citid from dbo.teams where teamName = ?"
 
 
 class PlayersDAO:
@@ -93,7 +93,7 @@ class PlayersDAO:
             for row in rs:
                 return row[0]
         except BaseException as be:
-            raise RuntimeError(cls.EX_PLAYER_ROLE.format(player_name))
+            raise RuntimeError(cls.EX_PLAYER_ROLE.format(player_name), be)
         finally:
             cursor.close()
             con.close()
@@ -125,11 +125,11 @@ class PlayersDAO:
     EX_INVALID_TEAM_NAME = "Invalid team name in ({0})"
     EX_INVALID_PLAYERS = "Invalid players in ({0})"
     EX_INVALID_PLAYER_NAME = "Invalid player name in ({0})"
-    GET_PLAYER_ID = "select hspid from players where playerName like '%%%s%%'"
-    GET_PLAYER_ROLE = "select batbowl from players where playerName like '%%%s%%'"
-    GET_PLAYERS = "select playerName from players " \
-                  "inner join teams " \
-                  "on players.teamid = teams.teamid " \
+    GET_PLAYER_ID = "select hspid from dbo.players where playerName like '%%%s%%'"
+    GET_PLAYER_ROLE = "select batbowl from dbo.players where playerName like '%%%s%%'"
+    GET_PLAYERS = "select playerName from dbo.players " \
+                  "inner join dbo.teams " \
+                  "on dbo.players.teamid = dbo.teams.teamid " \
                   "where teamName = ?"
 
 
@@ -154,7 +154,7 @@ class GroundsDAO:
             con.close()
 
     EX_GROUNDS = "Error while getting ground."
-    GET_GROUNDS = "select gname from grounds"
+    GET_GROUNDS = "select gname from dbo.grounds"
 
 
 class ConsistencyDAO:
@@ -179,9 +179,9 @@ class ConsistencyDAO:
 
     EX_CON_RANGE = "Error while getting consistency range using ({0})"
     EX_TA_NAME = "Invalid traditional attribute in ({0})"
-    GET_CON_RANGE = "select startRange, endRange, value, maxRange from Consistency \
-                    inner join TraditionalAttribs \
-                    on Consistency.tid = TraditionalAttribs.tid \
+    GET_CON_RANGE = "select startRange, endRange, value, maxRange from dbo.consistency \
+                    inner join dbo.traditionalattribs \
+                    on dbo.consistency.tid = dbo.traditionalattribs.tid \
                     where attribName = ?"
 
 
@@ -207,9 +207,9 @@ class FormDAO:
 
     EX_TA_NAME = "Invalid traditional attribute in ({0})"
     EX_FORM_RANGE = "Error while getting form range using ({0})"
-    GET_FORM_RANGE = "select startRange, endRange, value, maxRange from Form \
-                    inner join TraditionalAttribs \
-                    on Form.tid = TraditionalAttribs.tid \
+    GET_FORM_RANGE = "select startRange, endRange, value, maxRange from dbo.form \
+                    inner join dbo.traditionalattribs \
+                    on dbo.form.tid = dbo.traditionalattribs.tid \
                     where attribName = ?"
 
 
@@ -235,9 +235,9 @@ class OppositionDAO:
 
     EX_TA_NAME = "Invalid traditional attribute in ({0})"
     EX_OPP_RANGE = "Error while getting opposition range using ({0})"
-    GET_OPP_RANGE = "select startRange, endRange, value, maxRange from Opposition \
-                    inner join TraditionalAttribs \
-                    on Opposition.tid = TraditionalAttribs.tid \
+    GET_OPP_RANGE = "select startRange, endRange, value, maxRange from dbo.opposition \
+                    inner join dbo.traditionalattribs \
+                    on dbo.opposition.tid = dbo.traditionalattribs.tid \
                     where attribName = ?"
 
 
@@ -263,7 +263,7 @@ class VenueDAO:
 
     EX_TA_NAME = "Invalid traditional attribute in ({0})"
     EX_VEN_RANGE = "Error while getting venue range using ({0})"
-    GET_VEN_RANGE = "select startRange, endRange, value, maxRange from Venue \
-                    inner join TraditionalAttribs \
-                    on Venue.tid = TraditionalAttribs.tid \
+    GET_VEN_RANGE = "select startRange, endRange, value, maxRange from dbo.venue \
+                    inner join dbo.traditionalattribs \
+                    on dbo.venue.tid = dbo.traditionalattribs.tid \
                     where attribName = ?"

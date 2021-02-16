@@ -108,7 +108,7 @@ class PlayerPerformance:
             with open(cls.FILE_MODEL_RUNS, 'rb') as file:
                 model = pickle.load(file)
                 score = model.score(x, y)
-                print("runs predictions RandomForest Score : ", score)
+                print("Runs Predictions RandomForest Score : ", score)
                 print(model.get_params())
 
     @classmethod
