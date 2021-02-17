@@ -46,29 +46,29 @@ HEADER_COLS_CSV = ['Con', 'TotCon', 'Form', 'Opp', 'Ven', 'DreamTeam', 'BatBowl'
 # print(df)
 
 
-def test_predict():
-    # da = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
-    # Thread(target=da.consistency_form(bat, bowl)).start()
-    # Thread(target=da.total_consistency()).start()
-    # Thread(target=da.opposition_venue(bat, bowl)).start()
-    # da.execute_run(bat, bowl)
-    # da.consistency_form(bat, bowl)
-    # da.opposition_venue(bat, bowl)
-    # da.total_consistency()
-
-    con = pd.read_csv(da.FILE_CONSISTENCY)
-
-    total_con = pd.read_csv(da.FILE_TOTAL_CONSISTENCY)
-
-    form = pd.read_csv(da.FILE_FORM)
-
-    opp = pd.read_csv(da.FILE_OPPOSITION)
-
-    ven = pd.read_csv(da.FILE_VENUE)
-
-    ipl = PlayerPerformance(con, total_con, form, opp, ven)
-    array = ipl.predict()
-    print(array)
+# def test_predict():
+#     # da = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
+#     # Thread(target=da.consistency_form(bat, bowl)).start()
+#     # Thread(target=da.total_consistency()).start()
+#     # Thread(target=da.opposition_venue(bat, bowl)).start()
+#     # da.execute_run(bat, bowl)
+#     # da.consistency_form(bat, bowl)
+#     # da.opposition_venue(bat, bowl)
+#     # da.total_consistency()
+#
+#     con = pd.read_csv(da.FILE_CONSISTENCY)
+#
+#     total_con = pd.read_csv(da.FILE_TOTAL_CONSISTENCY)
+#
+#     form = pd.read_csv(da.FILE_FORM)
+#
+#     opp = pd.read_csv(da.FILE_OPPOSITION)
+#
+#     ven = pd.read_csv(da.FILE_VENUE)
+#
+#     ipl = PlayerPerformance(con, total_con, form, opp, ven)
+#     array = ipl.predict()
+#     print(array)
 
 
 def modify_train_data(train_data):
@@ -256,10 +256,10 @@ def train_player_runs():
     x = train_data.drop("DreamTeam", axis='columns')
     x.set_index('Unnamed: 0', inplace=True)
 
-    # ros = SMOTE()
-    # x_sampler, y_sampler = ros.fit_sample(x, y)
+    ros = SMOTE()
+    x_sampler, y_sampler = ros.fit_sample(x, y)
 
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1)
+    x_train, x_test, y_train, y_test = train_test_split(x_sampler, y_sampler, test_size=0.1)
 
     PlayerPerformance.fit_model_runs(x_train, y_train)
     PlayerPerformance.model_runs_score(x_test, y_test)
@@ -388,4 +388,4 @@ def train_player_wickets():
 # test_predict()
 # test_train_data()
 # train_player_runs()
-# train_player_wickets()
+train_player_wickets()

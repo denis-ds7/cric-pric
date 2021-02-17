@@ -6,6 +6,7 @@ Created on Fri Aug 14 16:15:03 2020
 """
 import psycopg2 as psql
 import threading
+import os
 
 
 class DBResource:
@@ -13,7 +14,7 @@ class DBResource:
     __singleton_lock = threading.Lock() 
     __con_instance = None
     # SERVER = 'localhost'
-    HOST = 'ec2-54-211-77-238.compute-1.amazonaws.com'
+    HOST = os.environ.get('DATABASE_URL')
     DATABASE = 'ddp61d32kckkl6'
     USERNAME = 'gretqxgonfiuce'
     PASSWORD = '72a79a5c33a1e3399a3f60df6e3aaf00714f76cb7826741ef9d5bbf23d47663d'
