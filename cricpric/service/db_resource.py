@@ -7,7 +7,6 @@ Created on Fri Aug 14 16:15:03 2020
 # import pyodbc as sql
 import psycopg2 as psql
 import threading
-import os
 
 
 class DBResource:
@@ -19,7 +18,7 @@ class DBResource:
     # USERNAME = 'sa'
     # PASSWORD = 'sqlserver17'
 
-    HOST = os.environ.get('DATABASE_URL')
+    HOST = "postgres://gretqxgonfiuce:72a79a5c33a1e3399a3f60df6e3aaf00714f76cb7826741ef9d5bbf23d47663d@ec2-54-211-77-238.compute-1.amazonaws.com:5432/ddp61d32kckkl6"
     DATABASE = 'ddp61d32kckkl6'
     USERNAME = 'gretqxgonfiuce'
     PASSWORD = '72a79a5c33a1e3399a3f60df6e3aaf00714f76cb7826741ef9d5bbf23d47663d'
