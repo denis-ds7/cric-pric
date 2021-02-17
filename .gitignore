@@ -1,5 +1,6 @@
 # Ignore everything in this directory
 .spyproject/
 .idea/
+data/
 # Except this file
 !.gitignore

@@ -4,6 +4,7 @@ Created on Fri Aug 14 16:15:03 2020
 
 @author: user 2
 """
+# import pyodbc as sql
 import psycopg2 as psql
 import threading
 import os
@@ -14,6 +15,10 @@ class DBResource:
     __singleton_lock = threading.Lock() 
     __con_instance = None
     # SERVER = 'localhost'
+    # DATABASE = 'CricPric'
+    # USERNAME = 'sa'
+    # PASSWORD = 'sqlserver17'
+
     HOST = os.environ.get('DATABASE_URL')
     DATABASE = 'ddp61d32kckkl6'
     USERNAME = 'gretqxgonfiuce'
