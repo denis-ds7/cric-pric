@@ -327,9 +327,9 @@ class PlayerPerformance:
     #     df = df.groupby(level=0).sum()
     #     return df
 
-    FILE_MODEL = 'model\\model_pickle'
-    FILE_MODEL_RUNS = 'model\\model_pickle_runs'
-    FILE_MODEL_WICKETS = 'model\\model_pickle_wickets'
+    FILE_MODEL = 'model\\model_pickle.pkl'
+    FILE_MODEL_RUNS = 'model\\model_pickle_runs.pkl'
+    FILE_MODEL_WICKETS = 'model\\model_pickle_wickets.pkl'
     FILE_MODEL_NB = 'model\\model_pickle_nb'
     FILE_MODEL_SVM = 'model\\model_pickle_svm'
     FILE_MODEL_DT = 'model\\model_pickle_dt'
