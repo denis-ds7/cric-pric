@@ -63,8 +63,11 @@ class CricPricService:
             runs_predict = player_performance.predict_runs(batsmen)
             wickets_predict = player_performance.predict_wickets(bowlers)
 
-            all_predictions = pd.merge(pd.merge(result, runs_predict, on='Players', how='left'), wickets_predict,
-                                       on='Players', how='left')
+            all_predictions = None
+            if (result and result is not None) and (runs_predict and runs_predict is not None) \
+                    and (wickets_predict and wickets_predict is not None):
+                all_predictions = pd.merge(pd.merge(result, runs_predict, on='Players', how='left'), wickets_predict,
+                                           on='Players', how='left')
             batting_plot, bowling_plot = self.__plot_graphs(dataset, batsmen, bowlers)
 
             self.__train_data_collection(dataset_wo_rf, self.FILE_TRAIN_DATA)
