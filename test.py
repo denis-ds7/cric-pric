@@ -10,7 +10,7 @@ from threading import Thread
 from sklearn.ensemble import RandomForestClassifier
 from imblearn.over_sampling import RandomOverSampler, SMOTE
 from cricpric.dao.dao import PlayersDAO
-from cricpric.preparation.data_collection import CreateOVC
+from cricpric.preparation.data_collection import CreateOV
 from cricpric.processing.create_modify import DerivedAttrs
 import pandas as pd
 import numpy as np

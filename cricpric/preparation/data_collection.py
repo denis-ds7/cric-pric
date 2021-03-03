@@ -14,23 +14,18 @@ from cricpric.dao.dao import TeamsDAO, PlayersDAO
 
 class CreateCF:
 
-    TEXT_BAT = "bat"
-    TEXT_BOWL = "bowl"
     TEXT_TR = "tr"
 
-    def __init__(self, team_name, bat_bowl, players_list):
-        self.team_name = team_name
-        self.bat_bowl = bat_bowl
-        self.players_list = players_list
+    def create_consistency_bat(self, team, playing_eleven):
+        alter_url = AlterUrls(ConstantUrl.CONSISTENCY_BAT_URL)
+        return self.__consistency(alter_url, team, playing_eleven)
 
-    def create_consistency(self):
-        alter_url = ''
-        if self.bat_bowl == self.TEXT_BAT:
-            alter_url = AlterUrls(ConstantUrl.CONSISTENCY_BAT_URL)
-        elif self.bat_bowl == self.TEXT_BOWL:
-            alter_url = AlterUrls(ConstantUrl.CONSISTENCY_BOWL_URL)
+    def create_consistency_bowl(self, team, playing_eleven):
+        alter_url = AlterUrls(ConstantUrl.CONSISTENCY_BOWL_URL)
+        return self.__consistency(alter_url, team, playing_eleven)
 
-        team_id = TeamsDAO.get_team_id(self.team_name)
+    def __consistency(self, alter_url, team, playing_eleven):
+        team_id = TeamsDAO.get_team_id(team)
         url = alter_url.team_url(team_id)
 
         soup = BSoup(url).get_soup()
@@ -38,73 +33,58 @@ class CreateCF:
         table_rows = players[0].find_all(self.TEXT_TR)
 
         df = DataUtils.create_df(table_rows)
-        return DataUtils.playing_eleven_df(df, self.players_list)
+        return DataUtils.playing_eleven_df(df, playing_eleven)
 
-    def create_form(self):
-        soup = None
-        if self.bat_bowl == self.TEXT_BAT:
-            soup = BSoup(ConstantUrl.FORM_BAT_URL).get_soup()
-        elif self.bat_bowl == self.TEXT_BOWL:
-            soup = BSoup(ConstantUrl.FORM_BOWL_URL).get_soup()
+    def create_form_bat(self, playing_eleven):
+        soup = BSoup(ConstantUrl.FORM_BAT_URL).get_soup()
+        return self.__form(soup, playing_eleven)
 
+    def create_form_bowl(self, playing_eleven):
+        soup = BSoup(ConstantUrl.FORM_BOWL_URL).get_soup()
+        return self.__form(soup, playing_eleven)
+
+    def __form(self, soup, playing_eleven):
         players = DataUtils.get_players(soup)
         if len(players) > 0:
             table_rows = players[0].find_all(self.TEXT_TR)
             df = DataUtils.create_df(table_rows)
-            return DataUtils.playing_eleven_df(df, self.players_list)
+            return DataUtils.playing_eleven_df(df, playing_eleven)
         else:
             return
 
-    # def create_form(self):
-    #     team_id = TeamsDAO.get_team_id(self.team_name)
-    #     alter_url = AlterUrls(ConstantUrl.FORM_BAT_BOWL_URL)
-    #     url = alter_url.team_url(team_id)
-    #     return self.__prepare_data(url)
-
-    def create_recent_form(self):
-        team_id = TeamsDAO.get_team_id(self.team_name)
+    def create_recent_form(self, team, playing_eleven):
+        team_id = TeamsDAO.get_team_id(team)
         alter_url = AlterUrls(ConstantUrl.RECENT_FORM_BAT_BOWL_URL)
         url = alter_url.team_url(team_id)
-        return self.__prepare_data(url)
+        return self.__prepare_data(url, playing_eleven)
 
-    def __prepare_data(self, url):
+    def __prepare_data(self, url, playing_eleven):
         soup = BSoup(url).get_soup()
         players = DataUtils.get_players(soup)
 
         if len(players) > 0:
-            if self.bat_bowl == self.TEXT_BAT:
-                table_rows = players[0].find_all(self.TEXT_TR)
-                df = DataUtils.create_df(table_rows)
-                return DataUtils.playing_eleven_df(df, self.players_list)
-            elif self.bat_bowl == self.TEXT_BOWL:
-                table_rows = players[1].find_all(self.TEXT_TR)
-                df = DataUtils.create_df(table_rows)
-                return DataUtils.playing_eleven_df(df, self.players_list)
+            # Can add thread to run both simultaneously
+            recent_form_bat = self.__process_rf(players, 0, playing_eleven)
+            recent_form_bowl = self.__process_rf(players, 1, playing_eleven)
+            return recent_form_bat, recent_form_bowl
         else:
             return
 
+    def __process_rf(self, players, index, playing_eleven):
+        table_rows = players[index].find_all(self.TEXT_TR)
+        df = DataUtils.create_df(table_rows)
+        return DataUtils.playing_eleven_df(df, playing_eleven)
 
-class CreateOVC:
-    TOTAL_CON_DROP_COLS = ['Batting', 'Not Outs:', 'Aggregate:', '4s:', '6s:', 'Balls Faced:', 'Opened Batting:',
-                           'Bowling', 'Balls:', 'Maidens:', 'Runs Conceded:', 'Wickets:', 'Best:', 'Economy Rate:',
-                           'Fielding', 'Catches:', 'Most Catches in Match:', 0, 0.0, '0', '0.0',
-                           'Wicket Keeping', 'Stumpings:', 'Most Dismissals in Match:',
-                           'Captaincy', 'Matches/Won/Lost:', 'Tosses Won:']
 
-    def __init__(self, players_list, bat_bowl):
-        self.players_list = players_list
-        self.bat_bowl = bat_bowl
+class CreateOV:
 
-    def create_total_consistency(self):
+    def create_total_consistency(self, playing_eleven):
+        playing_eleven.sort()
         total_consistency_df = pd.DataFrame()
-        players_id_list = PlayersDAO.get_player_id(self.players_list)
-
+        players_id_list = PlayersDAO.get_player_id(playing_eleven)
         for player_id in players_id_list:
             if player_id is not None:
-                alter_url = AlterUrls(ConstantUrl.TOTAL_CONSISTENCY_URL)
-                player_url = alter_url.player_url(player_id)
-                soup = BSoup(player_url).get_soup()
-                consistency = soup.find_all("table", attrs={"border": "0", "width": "270"})
+                consistency = self.__process_tc(player_id)
             else:
                 total_consistency_df = self.__default_values_total_consistency(total_consistency_df)
                 continue
@@ -118,85 +98,99 @@ class CreateOVC:
 
         total_consistency_df = self.__modify_tc(total_consistency_df.reset_index(drop=True))
 
-        total_consistency_df['Player'] = self.players_list
+        total_consistency_df['Player'] = playing_eleven
         total_consistency_df['InnBowls'] = self.__bowl_inn_tc(total_consistency_df)
 
         return total_consistency_df.reset_index(drop=True)
 
-    def create_opposition(self, opponent_team):
-        opposition_df = pd.DataFrame()
-        players_id_list = PlayersDAO.get_player_id(self.players_list)
+    @staticmethod
+    def __process_tc(player_id):
+        alter_url = AlterUrls(ConstantUrl.TOTAL_CONSISTENCY_URL)
+        player_url = alter_url.player_url(player_id)
+        soup = BSoup(player_url).get_soup()
+        return soup.find_all("table", attrs={"border": "0", "width": "270"})
+
+    def create_opposition(self, opponent_team, playing_eleven):
+        playing_eleven.sort()
+        opposition_df_bat = pd.DataFrame()
+        opposition_df_bowl = pd.DataFrame()
+        players_id_list = PlayersDAO.get_player_id(playing_eleven)
 
         for player_id in players_id_list:
             if player_id is not None:
                 versus = self.__find_table(player_id, ConstantUrl.OPPOSITION_URL)
             else:
-                opposition_df = self.__default_values_opposition(opposition_df, opponent_team)
+                opposition_df_bat = self.__default_values_opposition(opposition_df_bat, opponent_team)
+                opposition_df_bowl = self.__default_values_opposition(opposition_df_bowl, opponent_team)
                 continue
 
             if len(versus) > 0:
-                if self.bat_bowl == "bat":
-                    table_rows = versus[0].find_all("tr")
-                    bat_o_df = self.__get_df(table_rows)
-                    opposition_df = opposition_df.append(self.__check_versus(bat_o_df, opponent_team),
-                                                         ignore_index=True)
-                elif self.bat_bowl == "bowl":
-                    if len(versus) > 1:
-                        table_rows = versus[1].find_all("tr")
-                        bowl_o_df = self.__get_df(table_rows)
-                        opposition_df = opposition_df.append(self.__check_versus(bowl_o_df, opponent_team),
+                opposition_df_bat = opposition_df_bat.append(self.__process_opposition(versus, 0, opponent_team),
                                                              ignore_index=True)
-                    else:
-                        opposition_df = self.__default_values_opposition(opposition_df, opponent_team)
+                if len(versus) > 1:
+                    opposition_df_bowl = opposition_df_bowl.append(self.__process_opposition(versus, 1, opponent_team),
+                                                                   ignore_index=True)
+                else:
+                    opposition_df_bowl = self.__default_values_opposition(opposition_df_bowl, opponent_team)
             else:
-                opposition_df = self.__default_values_opposition(opposition_df, opponent_team)
+                opposition_df_bat = self.__default_values_opposition(opposition_df_bat, opponent_team)
+                opposition_df_bowl = self.__default_values_opposition(opposition_df_bowl, opponent_team)
 
-        opposition_df = opposition_df.fillna(0)
-        opposition_df['Player'] = self.players_list
+        opposition_df_bat = opposition_df_bat.fillna(0)
+        opposition_df_bowl = opposition_df_bowl.fillna(0)
+        opposition_df_bat['Player'] = playing_eleven
+        opposition_df_bowl['Player'] = playing_eleven
 
-        if self.bat_bowl == "bat":
-            opposition_df['Zeros'] = self.__bat_zeros_opposition(players_id_list, opponent_team)
-        elif self.bat_bowl == "bowl":
-            opposition_df['InnsBowl'] = self.__bowl_inn(opposition_df)
+        opposition_df_bat['Zeros'] = self.__bat_zeros_opposition(players_id_list, opponent_team)
+        opposition_df_bowl['InnsBowl'] = self.__bowl_inn(opposition_df_bowl)
 
-        return opposition_df
+        return opposition_df_bat, opposition_df_bowl
 
-    def create_venue(self, stadium_venue):
-        venue_df = pd.DataFrame()
-        players_id_list = PlayersDAO.get_player_id(self.players_list)
+    def __process_opposition(self, versus, index, opponent_team):
+        table_rows = versus[index].find_all("tr")
+        df = self.__get_df(table_rows)
+        return self.__check_versus(df, opponent_team)
+
+    def create_venue(self, stadium, playing_eleven):
+        playing_eleven.sort()
+        venue_df_bat = pd.DataFrame()
+        venue_df_bowl = pd.DataFrame()
+        players_id_list = PlayersDAO.get_player_id(playing_eleven)
 
         for player_id in players_id_list:
             if player_id is not None:
                 venue = self.__find_table(player_id, ConstantUrl.VENUE_URL)
             else:
-                venue_df = self.__default_values_venue(venue_df, stadium_venue)
+                venue_df_bat = self.__default_values_venue(venue_df_bat, stadium)
+                venue_df_bowl = self.__default_values_venue(venue_df_bowl, stadium)
                 continue
 
             if len(venue) > 0:
-                if self.bat_bowl == "bat":
-                    table_rows = venue[0].find_all("tr")
-                    bat_v_df = self.__get_df(table_rows)
-                    venue_df = venue_df.append(self.__check_ground(bat_v_df, stadium_venue), ignore_index=True)
-                elif self.bat_bowl == "bowl":
-                    if len(venue) > 1:
-                        table_rows = venue[1].find_all("tr")
-                        bowl_v_df = self.__get_df(table_rows)
-                        venue_df = venue_df.append(self.__check_ground(bowl_v_df, stadium_venue), ignore_index=True)
-                    else:
-                        venue_df = self.__default_values_venue(venue_df, stadium_venue)
+                venue_df_bat = venue_df_bat.append(self.__process_venue(venue, 0, stadium), ignore_index=True)
+                if len(venue) > 1:
+                    venue_df_bowl = venue_df_bowl.append(self.__process_venue(venue, 1, stadium), ignore_index=True)
+                else:
+                    venue_df_bowl = self.__default_values_venue(venue_df_bowl, stadium)
             else:
-                venue_df = self.__default_values_venue(venue_df, stadium_venue)
+                venue_df_bat = self.__default_values_venue(venue_df_bat, stadium)
+                venue_df_bowl = self.__default_values_venue(venue_df_bowl, stadium)
 
-        venue_df = venue_df.fillna(0)
-        venue_df['Player'] = self.players_list
+        venue_df_bat = venue_df_bat.fillna(0)
+        venue_df_bowl = venue_df_bowl.fillna(0)
+        venue_df_bat['Player'] = playing_eleven
+        venue_df_bowl['Player'] = playing_eleven
 
-        if self.bat_bowl == "bat":
-            venue_df['Zeros'] = self.__bat_zeros_venue(players_id_list, stadium_venue)
-            venue_df['BatSR'] = self.__bat_sr_venue(players_id_list, stadium_venue)
-        elif self.bat_bowl == "bowl":
-            venue_df['InnsBowl'] = self.__bowl_inn(venue_df)
+        venue_df_bat['Zeros'] = self.__bat_zeros_venue(players_id_list, stadium)
+        venue_df_bat['BatSR'] = self.__bat_sr_venue(players_id_list, stadium)
 
-        return venue_df
+        venue_df_bowl['InnsBowl'] = self.__bowl_inn(venue_df_bowl)
+
+        return venue_df_bat, venue_df_bowl
+
+    def __process_venue(self, venue, index, stadium):
+        table_rows = venue[index].find_all("tr")
+        df = self.__get_df(table_rows)
+        return self.__check_ground(df, stadium)
 
     @staticmethod
     def __default_values_venue(venue_df, stadium_venue):
@@ -370,15 +364,15 @@ class CreateOVC:
         df = df.replace(r'^\s*$', 0, regex=True)
         df = df.fillna(0)
 
-        df_bat = df.loc[:, :14]
-        df_bowl = df.loc[:, 15:]
+        df_bat = df.loc[:, :15]
+        df_bowl = df.loc[:, 16:]
 
-        fielding_row = df.loc[df[15] == 'Fielding'].index.tolist()
+        fielding_row = df.loc[df[16] == 'Fielding'].index.tolist()
         for row in fielding_row:
             row += 1
             df_bowl.loc[row] = 0
 
-        wk_row = df.loc[df[15] == 'Wicket Keeping'].index.tolist()
+        wk_row = df.loc[df[16] == 'Wicket Keeping'].index.tolist()
         for row in wk_row:
             row += 1
             df_bowl.loc[row] = 0
@@ -399,8 +393,15 @@ class CreateOVC:
 
     @staticmethod
     def __set_columns(df):
-        bowling_row = df.loc[df[15] == 'Bowling'].index.tolist()
+        bowling_row = df.loc[df[16] == 'Bowling'].index.tolist()
         for row in bowling_row:
             if df.loc[row].str.contains('Bowling').any():
                 df.columns = df.loc[row]
                 return df
+
+    TOTAL_CON_DROP_COLS = ['Batting', 'Not Outs:', 'Aggregate:', '4s:', '6s:', 'Balls Faced:', 'Opened Batting:',
+                           'Top Scored in Innings:',
+                           'Bowling', 'Balls:', 'Maidens:', 'Runs Conceded:', 'Wickets:', 'Best:', 'Economy Rate:',
+                           'Fielding', 'Catches:', 'Most Catches in Match:', 0, 0.0, '0', '0.0',
+                           'Wicket Keeping', 'Stumpings:', 'Most Dismissals in Match:',
+                           'Captaincy', 'Matches/Won/Lost:', 'Tosses Won:']

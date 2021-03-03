@@ -9,7 +9,8 @@ import pandas as pd
 import pickle
 from os import path
 from sklearn.ensemble import RandomForestClassifier
-from cricpric.dao.dao import ConsistencyDAO, FormDAO, OppositionDAO, VenueDAO, PlayersDAO
+from cricpric.dao.dao import ConsistencyDAO, FormDAO, OppositionDAO, VenueDAO
+from cricpric.util.util import DataUtils
 
 
 class PlayerPerformance:
@@ -129,196 +130,184 @@ class PlayerPerformance:
                 print("RandomForest Score : ", score)
                 print(model.get_params())
 
-    def calc_da(self):
-        # Calculate the Derived Attributes for each Player
+    def consistency_range(self, consistency_range):
         consistency_bat = {}
         consistency_bowl = {}
+        for i in self.consistency.index:
+            consistency_bat.update({self.consistency[self.COL_PLAYER][i]:
+                                        0.4262 * (DataUtils.check_range(consistency_range[1],
+                                                                        self.consistency[self.COL_BAT_AVG][i]))
+                                        + 0.2566 * (DataUtils.check_range(consistency_range[0],
+                                                                          self.consistency[self.COL_NO_OF_INN_BAT][i]))
+                                        + 0.1510 * (DataUtils.check_range(consistency_range[2],
+                                                                          self.consistency[self.COL_BAT_SR][i]))
+                                        + 0.0787 * (DataUtils.check_range(consistency_range[3],
+                                                                          self.consistency[self.COL_CENTURIES][i]))
+                                        + 0.0556 * (DataUtils.check_range(consistency_range[4],
+                                                                          self.consistency[self.COL_FIFTIES][i]))
+                                        - 0.0328 * (DataUtils.check_range(consistency_range[5],
+                                                                          self.consistency[self.COL_ZEROS][i]))
+                                    })
+
+            consistency_bowl.update({self.consistency[self.COL_PLAYER][i]:
+                                         0.4174 * (DataUtils.check_range(consistency_range[6],
+                                                                         self.consistency[self.COL_OVERS][i]))
+                                         + 0.2634 * (DataUtils.check_range(consistency_range[0],
+                                                                           self.consistency[self.COL_NO_OF_INN_BOWL][i]))
+                                         + 0.1602 * (DataUtils.check_range(consistency_range[8],
+                                                                           self.consistency[self.COL_BOWL_SR][i]))
+                                         + 0.0975 * (DataUtils.check_range(consistency_range[7],
+                                                                           self.consistency[self.COL_BOWL_AVG][i]))
+                                         + 0.0615 * (DataUtils.check_range(consistency_range[9],
+                                                                           self.consistency[self.COL_WICKET_HAUL][i]))
+                                     })
+        return consistency_bat, consistency_bowl
+
+    def total_consistency_range(self, consistency_range):
         total_con_bat = {}
         total_con_bowl = {}
+        for i in self.total_consistency.index:
+            total_con_bat.update({self.total_consistency[self.COL_PLAYER][i]:
+                                      0.4262 * (DataUtils.check_range(consistency_range[1],
+                                                                      self.total_consistency[self.COL_BAT_AVG][i]))
+                                      + 0.2566 * (DataUtils.check_range(consistency_range[0],
+                                                                        self.total_consistency[self.COL_NO_OF_INN_BAT][i]))
+                                      + 0.1510 * (DataUtils.check_range(consistency_range[2],
+                                                                        self.total_consistency[self.COL_BAT_SR][i]))
+                                      + 0.0787 * (DataUtils.check_range(consistency_range[3],
+                                                                        self.total_consistency[self.COL_CENTURIES][i]))
+                                      + 0.0556 * (DataUtils.check_range(consistency_range[4],
+                                                                        self.total_consistency[self.COL_FIFTIES][i]))
+                                      - 0.0328 * (DataUtils.check_range(consistency_range[5],
+                                                                        self.total_consistency[self.COL_ZEROS][i]))
+                                  })
+
+            total_con_bowl.update({self.total_consistency[self.COL_PLAYER][i]:
+                                       0.4174 * (DataUtils.check_range(consistency_range[6],
+                                                                       self.total_consistency[self.COL_OVERS][i]))
+                                       + 0.2634 * (DataUtils.check_range(consistency_range[0],
+                                                                         self.total_consistency[self.COL_NO_OF_INN_BOWL][i]))
+                                       + 0.1602 * (DataUtils.check_range(consistency_range[8],
+                                                                         self.total_consistency[self.COL_BOWL_SR][i]))
+                                       + 0.0975 * (DataUtils.check_range(consistency_range[7],
+                                                                         self.total_consistency[self.COL_BOWL_AVG][i]))
+                                       + 0.0615 * (DataUtils.check_range(consistency_range[9],
+                                                                         self.total_consistency[self.COL_WICKET_HAUL][i]))
+                                   })
+        return total_con_bat, total_con_bowl
+
+    def form_range(self, form_range):
         form_bat = {}
         form_bowl = {}
+        for i in self.form.index:
+            form_bat.update({self.form[self.COL_PLAYER][i]:
+                                 0.4262 * (DataUtils.check_range(form_range[1], self.form[self.COL_BAT_AVG][i]))
+                                 + 0.2566 * (DataUtils.check_range(form_range[0], self.form[self.COL_NO_OF_INN_BAT][i]))
+                                 + 0.1510 * (DataUtils.check_range(form_range[2], self.form[self.COL_BAT_SR][i]))
+                                 + 0.0787 * (DataUtils.check_range(form_range[3], self.form[self.COL_CENTURIES][i]))
+                                 + 0.0556 * (DataUtils.check_range(form_range[4], self.form[self.COL_FIFTIES][i]))
+                                 - 0.0328 * (DataUtils.check_range(form_range[5], self.form[self.COL_ZEROS][i]))
+                             })
+            form_bowl.update({self.form[self.COL_PLAYER][i]:
+                                  0.3269 * (DataUtils.check_range(form_range[6], self.form[self.COL_OVERS][i]))
+                                  + 0.2846 * (DataUtils.check_range(form_range[0], self.form[self.COL_NO_OF_INN_BOWL][i]))
+                                  + 0.1877 * (DataUtils.check_range(form_range[8], self.form[self.COL_BOWL_SR][i]))
+                                  + 0.1210 * (DataUtils.check_range(form_range[7], self.form[self.COL_BOWL_AVG][i]))
+                                  + 0.0798 * (DataUtils.check_range(form_range[9], self.form[self.COL_WICKET_HAUL][i]))
+                              })
+        return form_bat, form_bowl
+
+    def recent_form_range(self, form_range):
         recent_form_bat = {}
         recent_form_bowl = {}
+        for i in self.recent_form.index:
+            recent_form_bat.update({self.recent_form[self.COL_PLAYER][i]:
+                                        0.4262 * (DataUtils.check_range(form_range[1], self.recent_form[self.COL_BAT_AVG][i]))
+                                        + 0.2566 * (DataUtils.check_range(form_range[0], self.recent_form[self.COL_NO_OF_INN_BAT][i]))
+                                        + 0.1510 * (DataUtils.check_range(form_range[2], self.recent_form[self.COL_BAT_SR][i]))
+                                        + 0.0787 * (DataUtils.check_range(form_range[3], self.recent_form[self.COL_CENTURIES][i]))
+                                        + 0.0556 * (DataUtils.check_range(form_range[4], self.recent_form[self.COL_FIFTIES][i]))
+                                        - 0.0328 * (DataUtils.check_range(form_range[5], self.recent_form[self.COL_ZEROS][i]))
+                                    })
+
+            recent_form_bowl.update({self.recent_form[self.COL_PLAYER][i]:
+                                         0.3269 * (DataUtils.check_range(form_range[6], self.recent_form[self.COL_OVERS][i]))
+                                         + 0.2846 * (DataUtils.check_range(form_range[0], self.recent_form[self.COL_NO_OF_INN_BOWL][i]))
+                                         + 0.1877 * (DataUtils.check_range(form_range[8], self.recent_form[self.COL_BOWL_SR][i]))
+                                         + 0.1210 * (DataUtils.check_range(form_range[7], self.recent_form[self.COL_BOWL_AVG][i]))
+                                         + 0.0798 * (DataUtils.check_range(form_range[9], self.recent_form[self.COL_WICKET_HAUL][i]))
+                                     })
+        return recent_form_bat, recent_form_bowl
+
+    def opposition_range(self, opposition_range):
         opposition_bat = {}
         opposition_bowl = {}
+        for i in self.opposition.index:
+            opposition_bat.update({self.opposition[self.COL_PLAYER][i]:
+                                       0.4262 * (DataUtils.check_range(opposition_range[1],
+                                                                       self.opposition[self.COL_BAT_AVG][i]))
+                                       + 0.2566 * (DataUtils.check_range(opposition_range[0],
+                                                                         self.opposition[self.COL_NO_OF_INN_BAT][i]))
+                                       + 0.1510 * (DataUtils.check_range(opposition_range[2],
+                                                                         self.opposition[self.COL_BAT_SR][i]))
+                                       + 0.0787 * (DataUtils.check_range(opposition_range[3],
+                                                                         self.opposition[self.COL_CENTURIES][i]))
+                                       + 0.0556 * (DataUtils.check_range(opposition_range[4],
+                                                                         self.opposition[self.COL_FIFTIES][i]))
+                                       - 0.0328 * (DataUtils.check_range(opposition_range[5],
+                                                                         self.opposition[self.COL_ZEROS][i]))
+                                   })
+
+            opposition_bowl.update({self.opposition[self.COL_PLAYER][i]:
+                                        0.3177 * (DataUtils.check_range(opposition_range[6],
+                                                                        self.opposition[self.COL_OVERS][i]))
+                                        + 0.3177 * (DataUtils.check_range(opposition_range[0],
+                                                                          self.opposition[self.COL_NO_OF_INN_BOWL][i]))
+                                        + 0.1933 * (DataUtils.check_range(opposition_range[8],
+                                                                          self.opposition[self.COL_BOWL_SR][i]))
+                                        + 0.1465 * (DataUtils.check_range(opposition_range[7],
+                                                                          self.opposition[self.COL_BOWL_AVG][i]))
+                                        + 0.0943 * (DataUtils.check_range(opposition_range[9],
+                                                                          self.opposition[self.COL_WICKET_HAUL][i]))
+                                    })
+        return opposition_bat, opposition_bowl
+
+    def venue_range(self, venue_range):
         venue_bat = {}
         venue_bowl = {}
-
-        for i in self.consistency.index:
-            consistency_bat.update({self.consistency[self.COL_PLAYER][i]: \
-                                        0.4262 * (
-                                            ConsistencyDAO.get_con_range(self.consistency[self.COL_BAT_AVG][i],
-                                                                         self.BAT_AVG)) \
-                                        + 0.2566 * (
-                                            ConsistencyDAO.get_con_range(self.consistency[self.COL_NO_OF_INN_BAT][i],
-                                                                         self.NO_OF_INN)) \
-                                        + 0.1510 * (
-                                            ConsistencyDAO.get_con_range(self.consistency[self.COL_BAT_SR][i],
-                                                                         self.BAT_SR)) \
-                                        + 0.0787 * (
-                                            ConsistencyDAO.get_con_range(self.consistency[self.COL_CENTURIES][i],
-                                                                         self.CENTURIES)) \
-                                        + 0.0556 * (
-                                            ConsistencyDAO.get_con_range(self.consistency[self.COL_FIFTIES][i],
-                                                                         self.FIFTIES)) \
-                                        - 0.0328 * (
-                                            ConsistencyDAO.get_con_range(self.consistency[self.COL_ZEROS][i],
-                                                                         self.ZEROS))})
-
-            consistency_bowl.update({self.consistency[self.COL_PLAYER][i]: \
-                                         0.4174 * (
-                                             ConsistencyDAO.get_con_range(self.consistency[self.COL_OVERS][i],
-                                                                          self.OVERS)) \
-                                         + 0.2634 * (
-                                             ConsistencyDAO.get_con_range(self.consistency[self.COL_NO_OF_INN_BOWL][i],
-                                                                          self.NO_OF_INN)) \
-                                         + 0.1602 * (
-                                             ConsistencyDAO.get_con_range(self.consistency[self.COL_BOWL_SR][i],
-                                                                          self.BOWL_SR)) \
-                                         + 0.0975 * (
-                                             ConsistencyDAO.get_con_range(self.consistency[self.COL_BOWL_AVG][i],
-                                                                          self.BOWL_AVG)) \
-                                         + 0.0615 * (
-                                             ConsistencyDAO.get_con_range(self.consistency[self.COL_WICKET_HAUL][i],
-                                                                          self.FF))})
-
-        for i in self.total_consistency.index:
-            total_con_bat.update({self.total_consistency[self.COL_PLAYER][i]: \
-                                      0.4262 * (
-                                          ConsistencyDAO.get_con_range(self.total_consistency[self.COL_BAT_AVG][i],
-                                                                       self.BAT_AVG)) \
-                                      + 0.2566 * (
-                                          ConsistencyDAO.get_con_range(
-                                              self.total_consistency[self.COL_NO_OF_INN_BAT][i],
-                                              self.NO_OF_INN)) \
-                                      + 0.1510 * (
-                                          ConsistencyDAO.get_con_range(self.total_consistency[self.COL_BAT_SR][i],
-                                                                       self.BAT_SR)) \
-                                      + 0.0787 * (
-                                          ConsistencyDAO.get_con_range(self.total_consistency[self.COL_CENTURIES][i],
-                                                                       self.CENTURIES)) \
-                                      + 0.0556 * (
-                                          ConsistencyDAO.get_con_range(self.total_consistency[self.COL_FIFTIES][i],
-                                                                       self.FIFTIES)) \
-                                      - 0.0328 * (
-                                          ConsistencyDAO.get_con_range(self.total_consistency[self.COL_ZEROS][i],
-                                                                       self.ZEROS))})
-
-            total_con_bowl.update({self.total_consistency[self.COL_PLAYER][i]: \
-                                       0.4174 * (
-                                           ConsistencyDAO.get_con_range(self.total_consistency[self.COL_OVERS][i],
-                                                                        self.OVERS)) \
-                                       + 0.2634 * (
-                                           ConsistencyDAO.get_con_range(
-                                               self.total_consistency[self.COL_NO_OF_INN_BOWL][i],
-                                               self.NO_OF_INN)) \
-                                       + 0.1602 * (
-                                           ConsistencyDAO.get_con_range(self.total_consistency[self.COL_BOWL_SR][i],
-                                                                        self.BOWL_SR)) \
-                                       + 0.0975 * (
-                                           ConsistencyDAO.get_con_range(self.total_consistency[self.COL_BOWL_AVG][i],
-                                                                        self.BOWL_AVG)) \
-                                       + 0.0615 * (
-                                           ConsistencyDAO.get_con_range(self.total_consistency[self.COL_WICKET_HAUL][i],
-                                                                        self.FF))})
-
-        for i in self.form.index:
-            form_bat.update({self.form[self.COL_PLAYER][i]: \
-                                 0.4262 * (FormDAO.get_form_range(self.form[self.COL_BAT_AVG][i], self.BAT_AVG)) \
-                                 + 0.2566 * (
-                                     FormDAO.get_form_range(self.form[self.COL_NO_OF_INN_BAT][i], self.NO_OF_INN)) \
-                                 + 0.1510 * (FormDAO.get_form_range(self.form[self.COL_BAT_SR][i], self.BAT_SR)) \
-                                 + 0.0787 * (FormDAO.get_form_range(self.form[self.COL_CENTURIES][i], self.CENTURIES)) \
-                                 + 0.0556 * (FormDAO.get_form_range(self.form[self.COL_FIFTIES][i], self.FIFTIES)) \
-                                 - 0.0328 * (FormDAO.get_form_range(self.form[self.COL_ZEROS][i], self.ZEROS))})
-
-            form_bowl.update({self.form[self.COL_PLAYER][i]: \
-                                  0.3269 * (FormDAO.get_form_range(self.form[self.COL_OVERS][i], self.OVERS)) \
-                                  + 0.2846 * (
-                                      FormDAO.get_form_range(self.form[self.COL_NO_OF_INN_BOWL][i], self.NO_OF_INN)) \
-                                  + 0.1877 * (FormDAO.get_form_range(self.form[self.COL_BOWL_SR][i], self.BOWL_SR)) \
-                                  + 0.1210 * (FormDAO.get_form_range(self.form[self.COL_BOWL_AVG][i], self.BOWL_AVG)) \
-                                  + 0.0798 * (FormDAO.get_form_range(self.form[self.COL_WICKET_HAUL][i], self.FF))})
-
-        for i in self.recent_form.index:
-            recent_form_bat.update({self.recent_form[self.COL_PLAYER][i]: \
-                                        0.4262 * (FormDAO.get_form_range(self.recent_form[self.COL_BAT_AVG][i], self.BAT_AVG)) \
-                                        + 0.2566 * (
-                                            FormDAO.get_form_range(self.recent_form[self.COL_NO_OF_INN_BAT][i],
-                                                                   self.NO_OF_INN)) \
-                                        + 0.1510 * (FormDAO.get_form_range(self.recent_form[self.COL_BAT_SR][i], self.BAT_SR)) \
-                                        + 0.0787 * (
-                                            FormDAO.get_form_range(self.recent_form[self.COL_CENTURIES][i], self.CENTURIES)) \
-                                        + 0.0556 * (
-                                            FormDAO.get_form_range(self.recent_form[self.COL_FIFTIES][i], self.FIFTIES)) \
-                                        - 0.0328 * (FormDAO.get_form_range(self.recent_form[self.COL_ZEROS][i], self.ZEROS))})
-
-            recent_form_bowl.update({self.recent_form[self.COL_PLAYER][i]: \
-                                         0.3269 * (FormDAO.get_form_range(self.recent_form[self.COL_OVERS][i], self.OVERS)) \
-                                         + 0.2846 * (
-                                             FormDAO.get_form_range(self.recent_form[self.COL_NO_OF_INN_BOWL][i],
-                                                                    self.NO_OF_INN)) \
-                                         + 0.1877 * (
-                                             FormDAO.get_form_range(self.recent_form[self.COL_BOWL_SR][i], self.BOWL_SR)) \
-                                         + 0.1210 * (
-                                             FormDAO.get_form_range(self.recent_form[self.COL_BOWL_AVG][i], self.BOWL_AVG)) \
-                                         + 0.0798 * (
-                                             FormDAO.get_form_range(self.recent_form[self.COL_WICKET_HAUL][i], self.FF))})
-
-        for i in self.opposition.index:
-            opposition_bat.update({self.opposition[self.COL_PLAYER][i]: \
-                                       0.4262 * (
-                                           OppositionDAO.get_opp_range(self.opposition[self.COL_BAT_AVG][i],
-                                                                       self.BAT_AVG)) \
-                                       + 0.2566 * (
-                                           OppositionDAO.get_opp_range(self.opposition[self.COL_NO_OF_INN_BAT][i],
-                                                                       self.NO_OF_INN)) \
-                                       + 0.1510 * (
-                                           OppositionDAO.get_opp_range(self.opposition[self.COL_BAT_SR][i],
-                                                                       self.BAT_SR)) \
-                                       + 0.0787 * (
-                                           OppositionDAO.get_opp_range(self.opposition[self.COL_CENTURIES][i],
-                                                                       self.CENTURIES)) \
-                                       + 0.0556 * (
-                                           OppositionDAO.get_opp_range(self.opposition[self.COL_FIFTIES][i],
-                                                                       self.FIFTIES)) \
-                                       - 0.0328 * (
-                                           OppositionDAO.get_opp_range(self.opposition[self.COL_ZEROS][i],
-                                                                       self.ZEROS))})
-
-            opposition_bowl.update({self.opposition[self.COL_PLAYER][i]: \
-                                        0.3177 * (
-                                            OppositionDAO.get_opp_range(self.opposition[self.COL_OVERS][i], self.OVERS)) \
-                                        + 0.3177 * (
-                                            OppositionDAO.get_opp_range(self.opposition[self.COL_NO_OF_INN_BOWL][i],
-                                                                        self.NO_OF_INN)) \
-                                        + 0.1933 * (
-                                            OppositionDAO.get_opp_range(self.opposition[self.COL_BOWL_SR][i],
-                                                                        self.BOWL_SR)) \
-                                        + 0.1465 * (
-                                            OppositionDAO.get_opp_range(self.opposition[self.COL_BOWL_AVG][i],
-                                                                        self.BOWL_AVG)) \
-                                        + 0.0943 * (
-                                            OppositionDAO.get_opp_range(self.opposition[self.COL_WICKET_HAUL][i],
-                                                                        self.FF))})
-
         for i in self.venue.index:
-            venue_bat.update({self.venue[self.COL_PLAYER][i]: \
-                                  0.4262 * (VenueDAO.get_ven_range(self.venue[self.COL_BAT_AVG][i], self.BAT_AVG)) \
-                                  + 0.2566 * (
-                                      VenueDAO.get_ven_range(self.venue[self.COL_NO_OF_INN_BAT][i], self.NO_OF_INN)) \
-                                  + 0.1510 * (VenueDAO.get_ven_range(self.venue[self.COL_BAT_SR][i], self.BAT_SR)) \
-                                  + 0.0787 * (VenueDAO.get_ven_range(self.venue[self.COL_CENTURIES][i], self.CENTURIES)) \
-                                  + 0.0556 * (VenueDAO.get_ven_range(self.venue[self.COL_FIFTIES][i], self.FIFTIES)) \
-                                  + 0.0328 * (VenueDAO.get_ven_range(self.venue[self.COL_HS][i], self.HS))})
+            venue_bat.update({self.venue[self.COL_PLAYER][i]:
+                                  0.4262 * (DataUtils.check_range(venue_range[1], self.venue[self.COL_BAT_AVG][i]))
+                                  + 0.2566 * (DataUtils.check_range(venue_range[0], self.venue[self.COL_NO_OF_INN_BAT][i]))
+                                  + 0.1510 * (DataUtils.check_range(venue_range[2], self.venue[self.COL_BAT_SR][i]))
+                                  + 0.0787 * (DataUtils.check_range(venue_range[3], self.venue[self.COL_CENTURIES][i]))
+                                  + 0.0556 * (DataUtils.check_range(venue_range[4], self.venue[self.COL_FIFTIES][i]))
+                                  + 0.0328 * (DataUtils.check_range(venue_range[5], self.venue[self.COL_HS][i]))
+                              })
 
-            venue_bowl.update({self.venue[self.COL_PLAYER][i]: \
-                                   0.3018 * (VenueDAO.get_ven_range(self.venue[self.COL_OVERS][i], self.OVERS)) \
-                                   + 0.2783 * (
-                                       VenueDAO.get_ven_range(self.venue[self.COL_NO_OF_INN_BOWL][i], self.NO_OF_INN)) \
-                                   + 0.1836 * (VenueDAO.get_ven_range(self.venue[self.COL_BOWL_SR][i], self.BOWL_SR)) \
-                                   + 0.1391 * (VenueDAO.get_ven_range(self.venue[self.COL_BOWL_AVG][i], self.BOWL_AVG)) \
-                                   + 0.0972 * (VenueDAO.get_ven_range(self.venue[self.COL_WICKET_HAUL][i], self.FF))})
+            venue_bowl.update({self.venue[self.COL_PLAYER][i]:
+                                   0.3018 * (DataUtils.check_range(venue_range[6], self.venue[self.COL_OVERS][i]))
+                                   + 0.2783 * (DataUtils.check_range(venue_range[0], self.venue[self.COL_NO_OF_INN_BOWL][i]))
+                                   + 0.1836 * (DataUtils.check_range(venue_range[8], self.venue[self.COL_BOWL_SR][i]))
+                                   + 0.1391 * (DataUtils.check_range(venue_range[7], self.venue[self.COL_BOWL_AVG][i]))
+                                   + 0.0972 * (DataUtils.check_range(venue_range[9], self.venue[self.COL_WICKET_HAUL][i]))
+                               })
+        return venue_bat, venue_bowl
+
+    def calc_da(self):
+        consistency_range = ConsistencyDAO.get_con_range(self.TRADITIONAL_ATTRS)
+        consistency_bat, consistency_bowl = self.consistency_range(consistency_range)
+        total_con_bat, total_con_bowl = self.total_consistency_range(consistency_range)
+
+        form_range = FormDAO.get_form_range(self.TRADITIONAL_ATTRS)
+        form_bat, form_bowl = self.form_range(form_range)
+        recent_form_bat, recent_form_bowl = self.recent_form_range(form_range)
+
+        opposition_range = OppositionDAO.get_opp_range(self.TRADITIONAL_ATTRS)
+        opposition_bat, opposition_bowl = self.opposition_range(opposition_range)
+
+        venue_range = VenueDAO.get_ven_range(self.TRADITIONAL_ATTRS)
+        venue_bat, venue_bowl = self.venue_range(venue_range)
 
         data_set = [consistency_bat, total_con_bat, form_bat, recent_form_bat, opposition_bat, venue_bat, consistency_bowl,
                     total_con_bowl, form_bowl, recent_form_bowl, opposition_bowl, venue_bowl]
@@ -333,28 +322,6 @@ class PlayerPerformance:
                       'OppositionBowl', 'VenueBowl']
         return df
 
-    def modify_data_set(self, train_data):
-        batsmen = train_data.loc[:, 'ConsistencyBat':'VenueBat']
-        bowler = train_data.loc[:, 'ConsistencyBowl':'VenueBowl']
-
-        bowler.columns = self.HEADER_COLS
-        batsmen.columns = self.HEADER_COLS
-
-        batsmen['BatBowl'] = 1
-        bowler['BatBowl'] = 0
-
-        players = batsmen.index.tolist()
-        players = list(dict.fromkeys(players))
-        for player in players:
-            player_role = PlayersDAO.get_player_role(player)
-            if player_role == 'batsman' and bowler['BatBowl'][player].all() == 0:
-                bowler.drop(player, inplace=True)
-            elif player_role == 'bowler' and batsmen['BatBowl'][player].all() == 1:
-                batsmen.drop(player, inplace=True)
-
-        data = batsmen.append(bowler)
-        return data
-
     # @staticmethod
     # def __modify_prediction(df):
     #     df = df.groupby(level=0).sum()
@@ -367,17 +334,8 @@ class PlayerPerformance:
     FILE_MODEL_SVM = 'model\\model_pickle_svm'
     FILE_MODEL_DT = 'model\\model_pickle_dt'
 
-    NO_OF_INN = "No. of Innings"
-    BAT_AVG = "Batting Average"
-    BAT_SR = "Batting Strike Rate"
-    CENTURIES = "Centuries"
-    FIFTIES = "Fifties"
-    ZEROS = "Zeros"
-    HS = "Highest Score"
-    OVERS = "Overs"
-    BOWL_AVG = "Bowling Average"
-    BOWL_SR = "Bowling Strike Rate"
-    FF = "FF"
+    TRADITIONAL_ATTRS = ['No. of Innings', 'Batting Average', 'Batting Strike Rate', 'Centuries', 'Fifties', 'Zeros',
+                         'Highest Score', 'Overs', 'Bowling Average', 'Bowling Strike Rate', 'FF']
 
     COL_PLAYER = "Player"
     COL_BAT_AVG = "BatAvg"
@@ -392,5 +350,3 @@ class PlayerPerformance:
     COL_BOWL_AVG = "BowlAvg"
     COL_WICKET_HAUL = "WicketHaul"
     COL_HS = "HS"
-
-    HEADER_COLS = ['Consistency', 'TotalConsistency', 'Form', 'RecentForm', 'Opposition', 'Venue']

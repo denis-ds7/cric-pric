@@ -18,7 +18,7 @@ class DBResource:
     # USERNAME = 'sa'
     # PASSWORD = 'sqlserver17'
 
-    HOST = "postgres://gretqxgonfiuce:72a79a5c33a1e3399a3f60df6e3aaf00714f76cb7826741ef9d5bbf23d47663d@ec2-54-211-77-238.compute-1.amazonaws.com:5432/ddp61d32kckkl6"
+    HOST = "ec2-54-211-77-238.compute-1.amazonaws.com"
     DATABASE = 'ddp61d32kckkl6'
     USERNAME = 'gretqxgonfiuce'
     PASSWORD = '72a79a5c33a1e3399a3f60df6e3aaf00714f76cb7826741ef9d5bbf23d47663d'

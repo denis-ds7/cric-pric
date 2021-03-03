@@ -13,8 +13,7 @@ class ModifyCFOV:
 
     def modify_cf_df(self, bat, bowl):
         if bat is None or bowl is None or bat.empty or bowl.empty:
-            return
-            # raise RuntimeError(self.EX_MODIFY_CF.format(bat, bowl))
+            raise RuntimeError(self.EX_MODIFY_CF.format(bat, bowl))
 
         # bat = self.__drop_na(bat)
         # bowl = self.__drop_na(bowl)

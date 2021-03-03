@@ -6,7 +6,7 @@ Created on Fri Aug 14 16:45:38 2020
 """
 import os
 
-from cricpric.preparation.data_collection import CreateOVC
+from cricpric.preparation.data_collection import CreateOV
 from cricpric.processing.create_modify import DerivedAttrs
 import pandas as pd
 from cricpric.modeling.predict_performance import PlayerPerformance
