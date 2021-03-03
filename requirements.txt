@@ -2,6 +2,7 @@ streamlit==0.49.0
 pandas==1.1.1
 requests==2.22.0
 bs4
+lxml
 threaded
 psycopg2==2.8.6
 fuzzywuzzy==0.18.0
