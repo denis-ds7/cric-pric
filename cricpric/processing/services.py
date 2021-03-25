@@ -78,6 +78,17 @@ class CricPricService:
         else:
             return self.EX_INVALID_DETAILS
 
+    def consistency_stats(self, host_team, away_team, venue, host_playing, away_playing):
+        derived_attr = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
+        derived_attr.consistency()
+
+        if path.exists(derived_attr.FILE_CONSISTENCY):
+            con = pd.read_csv(derived_attr.FILE_CONSISTENCY)
+            if con is None or con.empty:
+                raise ValueError(self.EX_CON_DATA.format(con, derived_attr.FILE_CONSISTENCY))
+
+            return con
+
     def venue_stats(self, host_team, away_team, venue, host_playing, away_playing):
         derived_attr = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
         derived_attr.venue()
@@ -88,6 +99,28 @@ class CricPricService:
                 raise ValueError(self.EX_VEN_DATA.format(ven, derived_attr.FILE_VENUE))
 
             return ven
+
+    def opposition_stats(self, host_team, away_team, venue, host_playing, away_playing):
+        derived_attr = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
+        derived_attr.opposition()
+
+        if path.exists(derived_attr.FILE_OPPOSITION):
+            opp = pd.read_csv(derived_attr.FILE_OPPOSITION)
+            if opp is None or opp.empty:
+                raise ValueError(self.EX_OPP_DATA.format(opp, derived_attr.FILE_OPPOSITION))
+
+            return opp
+
+    def recent_form_stats(self, host_team, away_team, venue, host_playing, away_playing):
+        derived_attr = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
+        derived_attr.opposition()
+
+        if path.exists(derived_attr.FILE_RECENT_FORM):
+            rf = pd.read_csv(derived_attr.FILE_RECENT_FORM)
+            if rf is None or rf.empty:
+                raise ValueError(self.EX_RECENT_FORM_DATA.format(rf, derived_attr.FILE_RECENT_FORM))
+
+            return rf
 
     @staticmethod
     def __plot_graphs(dataset, batsmen, bowlers):
