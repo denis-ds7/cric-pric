@@ -26,10 +26,10 @@ class PlayerPerformance:
         self.venue = venue
 
     @staticmethod
-    def get_model(key):
+    def get_model(file_name):
         client = boto3.client('s3')
         bucket = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-        response = client.get_object(Bucket=bucket, Key=key)
+        response = client.get_object(Bucket=bucket, Key=file_name)
         body = response['Body'].read()
 
         return pickle.loads(body)
@@ -37,7 +37,7 @@ class PlayerPerformance:
     def predict(self, x):
         # if path.exists(self.FILE_MODEL):
         #     with open(self.FILE_MODEL, 'rb') as file:
-        model = self.get_model('model_pickle.pkl')
+        model = self.get_model("model_pickle.pkl")
         result = model.predict(x)
         player_names = x.index.tolist()
         output = {'Players': player_names, 'DreamTeam': result}
@@ -65,7 +65,7 @@ class PlayerPerformance:
     def predict_runs(self, x):
         # if path.exists(self.FILE_MODEL_RUNS):
         #     with open(self.FILE_MODEL_RUNS, 'rb') as file:
-        model = self.get_model('model_pickle_runs.pkl')
+        model = self.get_model("model_pickle_runs.pkl")
         result = model.predict(x)
         player_names = x.index.tolist()
         output = {'Players': player_names, 'Runs Prediction': result}
@@ -90,7 +90,7 @@ class PlayerPerformance:
     def predict_wickets(self, x):
         # if path.exists(self.FILE_MODEL_WICKETS):
         #     with open(self.FILE_MODEL_WICKETS, 'rb') as file:
-        model = self.get_model('model_pickle_wickets.pkl')
+        model = self.get_model("model_pickle_wickets.pkl")
         result = model.predict(x)
         player_names = x.index.tolist()
         output = {'Players': player_names, 'Wickets Prediction': result}
