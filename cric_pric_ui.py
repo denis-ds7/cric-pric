@@ -90,6 +90,18 @@ def on_venue():
     st.write(ven)
 
 
+def on_opposition():
+    service = CricPricService()
+    opp = service.opposition_stats(host_team, away_team, venue, host_playing, away_playing)
+    st.write(opp)
+
+
+def on_recent_form():
+    service = CricPricService()
+    rf = service.recent_form_stats(host_team, away_team, venue, host_playing, away_playing)
+    st.write(rf)
+
+
 host_team, away_team, venue, host_playing, away_playing = populate_data()
 
 if st.button(TEXT_PREDICT):
@@ -97,3 +109,9 @@ if st.button(TEXT_PREDICT):
 
 if st.button("Venue Stats"):
     on_venue()
+
+if st.button("Head2Head Stats"):
+    on_opposition()
+
+if st.button("Recent Form Stats"):
+    on_recent_form()
