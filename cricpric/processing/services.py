@@ -53,6 +53,7 @@ class CricPricService:
             dataset_wo_rf = dataset.drop('RecentForm', axis=1)
 
             result = player_performance.predict(dataset_wo_rf)
+            print(result)
 
             batsmen = dataset_wo_rf[dataset_wo_rf['BatBowl'] == 1]
             bowlers = dataset_wo_rf[dataset_wo_rf['BatBowl'] == 0]
@@ -61,11 +62,12 @@ class CricPricService:
             batsmen.drop('BatBowl', axis=1, inplace=True)
             bowlers.drop('BatBowl', axis=1, inplace=True)
             runs_predict = player_performance.predict_runs(batsmen)
+            print(runs_predict)
             wickets_predict = player_performance.predict_wickets(bowlers)
+            print(wickets_predict)
 
             all_predictions = None
-            if (result and result is not None) and (runs_predict and runs_predict is not None) \
-                    and (wickets_predict and wickets_predict is not None):
+            if result is not None and runs_predict is not None and wickets_predict is not None:
                 all_predictions = pd.merge(pd.merge(result, runs_predict, on='Players', how='left'), wickets_predict,
                                            on='Players', how='left')
             batting_plot, bowling_plot = self.__plot_graphs(dataset, batsmen, bowlers)
