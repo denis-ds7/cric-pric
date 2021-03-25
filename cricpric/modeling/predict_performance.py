@@ -4,7 +4,9 @@ Created on Fri Aug 21 18:16:30 2020
 
 @author: user 2
 """
+import os
 
+import boto3
 import pandas as pd
 import pickle
 from os import path
@@ -23,16 +25,25 @@ class PlayerPerformance:
         self.opposition = opposition
         self.venue = venue
 
+    @staticmethod
+    def get_model(key):
+        client = boto3.client('s3')
+        bucket = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+        response = client.get_object(Bucket=bucket, Key=key)
+        body = response['Body'].read()
+
+        return pickle.loads(body)
+
     def predict(self, x):
-        if path.exists(self.FILE_MODEL):
-            with open(self.FILE_MODEL, 'rb') as file:
-                model = pickle.load(file)
-                result = model.predict(x)
-                player_names = x.index.tolist()
-                output = {'Players': player_names, 'DreamTeam': result}
-                df = pd.DataFrame(output)
-                df = df.groupby(['Players'], as_index=False, sort=False).sum()
-                return df
+        # if path.exists(self.FILE_MODEL):
+        #     with open(self.FILE_MODEL, 'rb') as file:
+        model = self.get_model('model_pickle.pkl')
+        result = model.predict(x)
+        player_names = x.index.tolist()
+        output = {'Players': player_names, 'DreamTeam': result}
+        df = pd.DataFrame(output)
+        df = df.groupby(['Players'], as_index=False, sort=False).sum()
+        return df
 
     @classmethod
     def fit_model(cls, x, y):
@@ -52,14 +63,14 @@ class PlayerPerformance:
                 return model
 
     def predict_runs(self, x):
-        if path.exists(self.FILE_MODEL_RUNS):
-            with open(self.FILE_MODEL_RUNS, 'rb') as file:
-                model = pickle.load(file)
-                result = model.predict(x)
-                player_names = x.index.tolist()
-                output = {'Players': player_names, 'Runs Prediction': result}
-                df = pd.DataFrame(output)
-                return df
+        # if path.exists(self.FILE_MODEL_RUNS):
+        #     with open(self.FILE_MODEL_RUNS, 'rb') as file:
+        model = self.get_model('model_pickle_runs.pkl')
+        result = model.predict(x)
+        player_names = x.index.tolist()
+        output = {'Players': player_names, 'Runs Prediction': result}
+        df = pd.DataFrame(output)
+        return df
 
     @classmethod
     def fit_model_runs(cls, x, y):
@@ -77,14 +88,14 @@ class PlayerPerformance:
                 return model
 
     def predict_wickets(self, x):
-        if path.exists(self.FILE_MODEL_WICKETS):
-            with open(self.FILE_MODEL_WICKETS, 'rb') as file:
-                model = pickle.load(file)
-                result = model.predict(x)
-                player_names = x.index.tolist()
-                output = {'Players': player_names, 'Wickets Prediction': result}
-                df = pd.DataFrame(output)
-                return df
+        # if path.exists(self.FILE_MODEL_WICKETS):
+        #     with open(self.FILE_MODEL_WICKETS, 'rb') as file:
+        model = self.get_model('model_pickle_wickets.pkl')
+        result = model.predict(x)
+        player_names = x.index.tolist()
+        output = {'Players': player_names, 'Wickets Prediction': result}
+        df = pd.DataFrame(output)
+        return df
 
     @classmethod
     def fit_model_wickets(cls, x, y):
