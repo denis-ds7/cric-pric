@@ -114,6 +114,7 @@ class DataUtils:
         if not rs or rs is None:
             raise ValueError(cls.EX_INVALID_RS.format(rs))
 
+        num = float(num)
         for row in rs:
             if num == 0:
                 return 0

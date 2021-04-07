@@ -4,7 +4,7 @@ Created on Wed Aug 19 13:21:37 2020
 
 @author: user 2
 """
-from threading import Thread
+from concurrent.futures import thread
 
 from cricpric.preparation.data_collection import CreateCF, CreateOV
 from cricpric.processing.data_extraction import ModifyCFOV
@@ -23,45 +23,43 @@ class DerivedAttrs:
         self.away_playing = away_playing
 
     def process(self):
-        t1 = Thread(target=self.consistency)
-        t2 = Thread(target=self.form)
-        t3 = Thread(target=self.recent_form)
-        t4 = Thread(target=self.total_consistency)
-        t5 = Thread(target=self.opposition)
-        t6 = Thread(target=self.venue)
+        # t1 = Thread(target=self.consistency)
+        # t2 = Thread(target=self.form)
+        # t3 = Thread(target=self.recent_form)
+        # t4 = Thread(target=self.total_consistency)
+        # t5 = Thread(target=self.opposition)
+        # t6 = Thread(target=self.venue)
+        #
+        # t1.start()
+        # t2.start()
+        # t3.start()
+        # t4.start()
+        # t5.start()
+        # t6.start()
+        #
+        # t1.join()
+        # t2.join()
+        # t3.join()
+        # t4.join()
+        # t5.join()
+        # t6.join()
 
-        t1.start()
-        t2.start()
-        t3.start()
-        t4.start()
-        t5.start()
-        t6.start()
+        with thread.ThreadPoolExecutor() as executor:
+            f1 = executor.submit(self.consistency)
+            f2 = executor.submit(self.form)
+            f3 = executor.submit(self.recent_form)
+            f4 = executor.submit(self.total_consistency)
+            f5 = executor.submit(self.opposition)
+            f6 = executor.submit(self.venue)
 
-        t1.join()
-        t2.join()
-        t3.join()
-        t4.join()
-        t5.join()
-        t6.join()
+        con = f1.result()
+        form = f2.result()
+        rf = f3.result()
+        tc = f4.result()
+        opp = f5.result()
+        ven = f6.result()
 
-        # with thread.ThreadPoolExecutor() as executor:
-        #     executor.submit(self.consistency, create_cf, modify)
-        #     executor.submit(self.form, create_cf, modify)
-        #     executor.submit(self.recent_form, create_cf, modify)
-        #     executor.submit(self.total_consistency, create_ov, modify)
-        #     executor.submit(self.opposition, create_ov, modify)
-        #     executor.submit(self.venue, create_ov, modify)
-
-    # def create_da(self):
-    #     create_cf = CreateCF()
-    #     modify = ModifyCFOV()
-    #     create_ov = CreateOV()
-    #     self.consistency(create_cf, modify)
-    #     self.form(create_cf, modify)
-    #     self.recent_form(create_cf, modify)
-    #     self.total_consistency(create_ov, modify)
-    #     self.opposition(create_ov, modify)
-    #     self.venue(create_ov, modify)
+        return con, form, rf, tc, opp, ven
 
     def consistency(self):
         create_cf = CreateCF()
@@ -96,6 +94,10 @@ class DerivedAttrs:
             os.remove(self.FILE_CONSISTENCY)
         consistency.to_csv(self.FILE_CONSISTENCY, header=self.CON_FORM_COLS, index=False)
 
+        consistency.columns = self.CON_FORM_COLS
+        consistency.reset_index(drop=True, inplace=True)
+        return consistency
+
     def form(self):
         create_cf = CreateCF()
         modify = ModifyCFOV()
@@ -129,6 +131,10 @@ class DerivedAttrs:
             os.remove(self.FILE_FORM)
         form.to_csv(self.FILE_FORM, header=self.CON_FORM_COLS, index=False)
 
+        form.columns = self.CON_FORM_COLS
+        form.reset_index(drop=True, inplace=True)
+        return form
+
     def recent_form(self):
         create_cf = CreateCF()
         modify = ModifyCFOV()
@@ -145,6 +151,10 @@ class DerivedAttrs:
         if path.exists(self.FILE_RECENT_FORM):
             os.remove(self.FILE_RECENT_FORM)
         recent_form.to_csv(self.FILE_RECENT_FORM, header=self.CON_FORM_COLS, index=False)
+
+        recent_form.columns = self.CON_FORM_COLS
+        recent_form.reset_index(drop=True, inplace=True)
+        return recent_form
 
     def total_consistency(self):
         modify = ModifyCFOV()
@@ -164,6 +174,10 @@ class DerivedAttrs:
             os.remove(self.FILE_TOTAL_CONSISTENCY)
         total_consistency.to_csv(self.FILE_TOTAL_CONSISTENCY, header=self.TOT_CON_COLS, index=False)
 
+        total_consistency.columns = self.TOT_CON_COLS
+        total_consistency.reset_index(drop=True, inplace=True)
+        return total_consistency
+
     def opposition(self):
         modify = ModifyCFOV()
         create_ov = CreateOV()
@@ -182,6 +196,10 @@ class DerivedAttrs:
             os.remove(self.FILE_OPPOSITION)
         opposition.to_csv(self.FILE_OPPOSITION, header=self.OPP_COLS, index=False)
 
+        opposition.columns = self.OPP_COLS
+        opposition.reset_index(drop=True, inplace=True)
+        return opposition
+
     def venue(self):
         modify = ModifyCFOV()
         create_ov = CreateOV()
@@ -199,6 +217,10 @@ class DerivedAttrs:
         if path.exists(self.FILE_VENUE):
             os.remove(self.FILE_VENUE)
         venue.to_csv(self.FILE_VENUE, header=self.VEN_COLS, index=False)
+
+        venue.columns = self.VEN_COLS
+        venue.reset_index(drop=True, inplace=True)
+        return venue
 
     # current_form = self.__merge_form(form, recent_form)
     @staticmethod

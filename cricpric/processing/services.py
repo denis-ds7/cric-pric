@@ -14,115 +14,112 @@ class CricPricService:
 
     def process(self, host_team, away_team, venue, host_playing, away_playing):
         derived_attr = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
-        derived_attr.process()
+        con, form, r_form, tot_con, opp, ven = derived_attr.process()
 
-        if path.exists(derived_attr.FILE_CONSISTENCY) and path.exists(derived_attr.FILE_FORM) \
-                and path.exists(derived_attr.FILE_OPPOSITION) and path.exists(derived_attr.FILE_VENUE):
-            con = pd.read_csv(derived_attr.FILE_CONSISTENCY)
-            if con is None or con.empty:
-                raise ValueError(self.EX_CON_DATA.format(con, derived_attr.FILE_CONSISTENCY))
+        # if path.exists(derived_attr.FILE_CONSISTENCY) and path.exists(derived_attr.FILE_FORM) \
+        #         and path.exists(derived_attr.FILE_OPPOSITION) and path.exists(derived_attr.FILE_VENUE):
+        # con = pd.read_csv(derived_attr.FILE_CONSISTENCY)
+        if con is None or con.empty:
+            raise ValueError(self.EX_CON_DATA.format(con, derived_attr.FILE_CONSISTENCY))
 
-            tot_con = pd.read_csv(derived_attr.FILE_TOTAL_CONSISTENCY)
-            if tot_con is None or tot_con.empty:
-                raise ValueError(self.EX_TOTAL_CON_DATA.format(tot_con, derived_attr.FILE_TOTAL_CONSISTENCY))
+        # tot_con = pd.read_csv(derived_attr.FILE_TOTAL_CONSISTENCY)
+        if tot_con is None or tot_con.empty:
+            raise ValueError(self.EX_TOTAL_CON_DATA.format(tot_con, derived_attr.FILE_TOTAL_CONSISTENCY))
 
-            form = pd.read_csv(derived_attr.FILE_FORM)
-            if form is None or form.empty:
-                raise ValueError(self.EX_FORM_DATA.format(form, derived_attr.FILE_FORM))
+        # form = pd.read_csv(derived_attr.FILE_FORM)
+        if form is None or form.empty:
+            raise ValueError(self.EX_FORM_DATA.format(form, derived_attr.FILE_FORM))
 
-            r_form = pd.read_csv(derived_attr.FILE_RECENT_FORM)
-            if r_form is None or r_form.empty:
-                raise ValueError(self.EX_RECENT_FORM_DATA.format(r_form, derived_attr.FILE_RECENT_FORM))
+        # r_form = pd.read_csv(derived_attr.FILE_RECENT_FORM)
+        if r_form is None or r_form.empty:
+            raise ValueError(self.EX_RECENT_FORM_DATA.format(r_form, derived_attr.FILE_RECENT_FORM))
 
-            opp = pd.read_csv(derived_attr.FILE_OPPOSITION)
-            if opp is None or opp.empty:
-                raise ValueError(self.EX_OPP_DATA.format((opp, derived_attr.FILE_OPPOSITION)))
+        # opp = pd.read_csv(derived_attr.FILE_OPPOSITION)
+        if opp is None or opp.empty:
+            raise ValueError(self.EX_OPP_DATA.format((opp, derived_attr.FILE_OPPOSITION)))
 
-            ven = pd.read_csv(derived_attr.FILE_VENUE)
-            if ven is None or ven.empty:
-                raise ValueError(self.EX_VEN_DATA.format(ven, derived_attr.FILE_VENUE))
+        # ven = pd.read_csv(derived_attr.FILE_VENUE)
+        if ven is None or ven.empty:
+            raise ValueError(self.EX_VEN_DATA.format(ven, derived_attr.FILE_VENUE))
 
-            player_performance = PlayerPerformance(con, tot_con, form, r_form, opp, ven)
-            dataset = player_performance.calc_da()
+        player_performance = PlayerPerformance(con, tot_con, form, r_form, opp, ven)
+        dataset = player_performance.calc_da()
 
-            if path.exists(self.FILE_DATASET):
-                os.remove(self.FILE_DATASET)
-            dataset.to_csv(self.FILE_DATASET)
+        if path.exists(self.FILE_DATASET):
+            os.remove(self.FILE_DATASET)
+        dataset.to_csv(self.FILE_DATASET)
 
-            dataset = self.__modify_data_set(dataset)
-            dataset_wo_rf = dataset.drop('RecentForm', axis=1)
+        dataset = self.__modify_data_set(dataset)
+        dataset_wo_rf = dataset.drop('RecentForm', axis=1)
 
-            result = player_performance.predict(dataset_wo_rf)
-            print(result)
+        result = player_performance.predict(dataset_wo_rf)
 
-            batsmen = dataset_wo_rf[dataset_wo_rf['BatBowl'] == 1]
-            bowlers = dataset_wo_rf[dataset_wo_rf['BatBowl'] == 0]
+        batsmen = dataset_wo_rf[dataset_wo_rf['BatBowl'] == 1]
+        bowlers = dataset_wo_rf[dataset_wo_rf['BatBowl'] == 0]
 
-            # runs_wicket_data = dataset.drop('BatBowl', axis=1)
-            batsmen.drop('BatBowl', axis=1, inplace=True)
-            bowlers.drop('BatBowl', axis=1, inplace=True)
-            runs_predict = player_performance.predict_runs(batsmen)
-            print(runs_predict)
-            wickets_predict = player_performance.predict_wickets(bowlers)
-            print(wickets_predict)
+        # runs_wicket_data = dataset.drop('BatBowl', axis=1)
+        batsmen.drop('BatBowl', axis=1, inplace=True)
+        bowlers.drop('BatBowl', axis=1, inplace=True)
+        runs_predict = player_performance.predict_runs(batsmen)
+        wickets_predict = player_performance.predict_wickets(bowlers)
 
-            all_predictions = None
-            if result is not None and runs_predict is not None and wickets_predict is not None:
-                all_predictions = pd.merge(pd.merge(result, runs_predict, on='Players', how='left'), wickets_predict,
-                                           on='Players', how='left')
-            batting_plot, bowling_plot = self.__plot_graphs(dataset, batsmen, bowlers)
+        all_predictions = None
+        if result is not None and runs_predict is not None and wickets_predict is not None:
+            all_predictions = pd.merge(pd.merge(result, runs_predict, on='Players', how='left'), wickets_predict,
+                                       on='Players', how='left')
+        batting_plot, bowling_plot = self.__plot_graphs(dataset, batsmen, bowlers)
 
-            self.__train_data_collection(dataset_wo_rf, self.FILE_TRAIN_DATA)
-            self.__train_data_collection(dataset, self.FILE_TRAIN_DATA_FORM)
-            self.__train_data_collection(batsmen, self.FILE_TRAIN_DATA_RUNS)
-            self.__train_data_collection(bowlers, self.FILE_TRAIN_DATA_WICKETS)
-            return all_predictions, dataset, batting_plot, bowling_plot
-        else:
-            return self.EX_INVALID_DETAILS
+        self.__train_data_collection(dataset_wo_rf, self.FILE_TRAIN_DATA)
+        self.__train_data_collection(dataset, self.FILE_TRAIN_DATA_FORM)
+        self.__train_data_collection(batsmen, self.FILE_TRAIN_DATA_RUNS)
+        self.__train_data_collection(bowlers, self.FILE_TRAIN_DATA_WICKETS)
+        return all_predictions, dataset, batting_plot, bowling_plot
+        # else:
+        #     return self.EX_INVALID_DETAILS
 
     def consistency_stats(self, host_team, away_team, venue, host_playing, away_playing):
         derived_attr = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
-        derived_attr.consistency()
+        con = derived_attr.consistency()
 
-        if path.exists(derived_attr.FILE_CONSISTENCY):
-            con = pd.read_csv(derived_attr.FILE_CONSISTENCY)
-            if con is None or con.empty:
-                raise ValueError(self.EX_CON_DATA.format(con, derived_attr.FILE_CONSISTENCY))
+        # if path.exists(derived_attr.FILE_CONSISTENCY):
+        #     con = pd.read_csv(derived_attr.FILE_CONSISTENCY)
+        if con is None or con.empty:
+            raise ValueError(self.EX_CON_DATA.format(con, derived_attr.FILE_CONSISTENCY))
 
-            return con
+        return con
 
     def venue_stats(self, host_team, away_team, venue, host_playing, away_playing):
         derived_attr = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
-        derived_attr.venue()
+        ven = derived_attr.venue()
 
-        if path.exists(derived_attr.FILE_VENUE):
-            ven = pd.read_csv(derived_attr.FILE_VENUE)
-            if ven is None or ven.empty:
-                raise ValueError(self.EX_VEN_DATA.format(ven, derived_attr.FILE_VENUE))
+        # if path.exists(derived_attr.FILE_VENUE):
+        #     ven = pd.read_csv(derived_attr.FILE_VENUE)
+        if ven is None or ven.empty:
+            raise ValueError(self.EX_VEN_DATA.format(ven, derived_attr.FILE_VENUE))
 
-            return ven
+        return ven
 
     def opposition_stats(self, host_team, away_team, venue, host_playing, away_playing):
         derived_attr = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
-        derived_attr.opposition()
+        opp = derived_attr.opposition()
 
-        if path.exists(derived_attr.FILE_OPPOSITION):
-            opp = pd.read_csv(derived_attr.FILE_OPPOSITION)
-            if opp is None or opp.empty:
-                raise ValueError(self.EX_OPP_DATA.format(opp, derived_attr.FILE_OPPOSITION))
+        # if path.exists(derived_attr.FILE_OPPOSITION):
+        #     opp = pd.read_csv(derived_attr.FILE_OPPOSITION)
+        if opp is None or opp.empty:
+            raise ValueError(self.EX_OPP_DATA.format(opp, derived_attr.FILE_OPPOSITION))
 
-            return opp
+        return opp
 
     def recent_form_stats(self, host_team, away_team, venue, host_playing, away_playing):
         derived_attr = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
-        derived_attr.opposition()
+        rf = derived_attr.opposition()
 
-        if path.exists(derived_attr.FILE_RECENT_FORM):
-            rf = pd.read_csv(derived_attr.FILE_RECENT_FORM)
-            if rf is None or rf.empty:
-                raise ValueError(self.EX_RECENT_FORM_DATA.format(rf, derived_attr.FILE_RECENT_FORM))
+        # if path.exists(derived_attr.FILE_RECENT_FORM):
+        #     rf = pd.read_csv(derived_attr.FILE_RECENT_FORM)
+        if rf is None or rf.empty:
+            raise ValueError(self.EX_RECENT_FORM_DATA.format(rf, derived_attr.FILE_RECENT_FORM))
 
-            return rf
+        return rf
 
     @staticmethod
     def __plot_graphs(dataset, batsmen, bowlers):
