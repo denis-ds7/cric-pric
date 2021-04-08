@@ -9,17 +9,18 @@ import streamlit as st
 
 from cricpric.dao.dao import TeamsDAO, GroundsDAO, PlayersDAO
 from cricpric.processing.services import CricPricService
-from PIL import Image
+# from PIL import Image
 
-st.set_page_config(page_title="CricPric",
-                   page_icon="🏏")
-
-image = Image.open('media\\i01_cric-pric-logo.JPG')
-image_logo, title = st.beta_columns([0.5, 3])
-image_logo.image(image)
-title.write("# CricPric")
+# st.set_page_config(page_title="CricPric",
+#                    page_icon="🏏")
+#
+# image = Image.open('media\\i01_cric-pric-logo.JPG')
+# image_logo, title = st.beta_columns([0.5, 3])
+# image_logo.image(image)
+# title.write("# CricPric")
 
 TEXT_TITLE = """
+         # CricPric
          Predict player performance
          """
 
