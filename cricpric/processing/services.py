@@ -112,7 +112,7 @@ class CricPricService:
 
     def recent_form_stats(self, host_team, away_team, venue, host_playing, away_playing):
         derived_attr = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
-        rf = derived_attr.opposition()
+        rf = derived_attr.recent_form()
 
         # if path.exists(derived_attr.FILE_RECENT_FORM):
         #     rf = pd.read_csv(derived_attr.FILE_RECENT_FORM)
@@ -120,6 +120,17 @@ class CricPricService:
             raise ValueError(self.EX_RECENT_FORM_DATA.format(rf, derived_attr.FILE_RECENT_FORM))
 
         return rf
+
+    def form_stats(self, host_team, away_team, venue, host_playing, away_playing):
+        derived_attr = DerivedAttrs(host_team, away_team, venue, host_playing, away_playing)
+        form = derived_attr.form()
+
+        # if path.exists(derived_attr.FILE_RECENT_FORM):
+        #     rf = pd.read_csv(derived_attr.FILE_RECENT_FORM)
+        if form is None or form.empty:
+            raise ValueError(self.EX_FORM_DATA.format(form, derived_attr.FILE_RECENT_FORM))
+
+        return form
 
     @staticmethod
     def __plot_graphs(dataset, batsmen, bowlers):
