@@ -78,10 +78,32 @@ def populate_data():
     return host_t, away_t, ground, host_players, away_players
 
 
-@st.cache(suppress_st_warning=True)
 def on_predict():
     service = CricPricService()
-    return service.process(host_team, away_team, venue, host_playing, away_playing)
+    
+    if host_team == 'Select Team':
+        st.info("Please select Host Team")
+        st.stop()
+    if away_team == 'Select Team':
+        st.info("Please select Away Team")
+        st.stop()
+    if venue == 'Select Venue':
+        st.info("Please select Venue")
+        st.stop()
+    if not host_playing:
+        st.info("Please select host players")
+        st.stop()
+    if not away_playing:
+        st.info("Please select away players")
+        st.stop()
+
+    prediction, dataset, batting_plot, bowling_plot = service.process(host_team, away_team, venue, host_playing, away_playing)
+
+    st.write(TEXT_PREDICTED_PLAYERS)
+    st.write(prediction)
+    st.pyplot(batting_plot)
+    st.pyplot(bowling_plot)
+    st.dataframe(dataset)
 
 
 @st.cache(suppress_st_warning=True)
@@ -119,29 +141,8 @@ host_team, away_team, venue, host_playing, away_playing = populate_data()
 
 if st.button(TEXT_PREDICT, help='Click to get the players performance prediction.'
                                 'Ex: Will a player be in DreamTeam, Run Prediction and Wicket Prediction'):
-    if host_team == 'Select Team':
-        st.info("Please select Host Team")
-        st.stop()
-    if away_team == 'Select Team':
-        st.info("Please select Away Team")
-        st.stop()
-    if venue == 'Select Venue':
-        st.info("Please select Venue")
-        st.stop()
-    if not host_playing:
-        st.info("Please select host players")
-        st.stop()
-    if not away_playing:
-        st.info("Please select away players")
-        st.stop()
+    on_predict()
 
-    prediction, dataset, batting_plot, bowling_plot = on_predict()
-
-    st.write(TEXT_PREDICTED_PLAYERS)
-    st.write(prediction)
-    st.pyplot(batting_plot)
-    st.pyplot(bowling_plot)
-    st.dataframe(dataset)
 if st.button("Consistency Stats", help='Click to get the stats of all match played by a player for a IPL team.'
                                        'Ex: Stats of MS Dhoni played for CSK in all IPL Season.'):
     if host_team == 'Select Team':
