@@ -18,7 +18,7 @@ class ConstantUrl:
     VENUE_URL = "http://www.howstat.com/cricket/Statistics/IPL/PlayerGrounds.asp?"
     CAREER_INN_BAT_URL = "http://howstat.com/cricket/Statistics/IPL/PlayerProgressBat.asp?"
     TOTAL_CONSISTENCY_URL = "http://www.howstat.com/cricket/Statistics/IPL/PlayerOverview.asp?"
-    RECENT_FORM_BAT_BOWL_URL = "https://stats.espncricinfo.com/ci/engine/records/averages/batting_bowling_by_team.html?id=13533;type=tournament"
+    RECENT_FORM_BAT_BOWL_URL = "https://stats.espncricinfo.com/ci/engine/records/averages/batting_bowling_by_team.html?id=13840;type=tournament"
 
 
 class AlterUrls:
